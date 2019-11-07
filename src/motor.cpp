@@ -11,4 +11,4 @@ void motor::setSpeed(int speed)
 {
         mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_A, speed);
 
-}
+}//aa
