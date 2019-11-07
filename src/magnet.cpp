@@ -1,8 +1,8 @@
 #include "magnet.h"
 
-magnet::magnet(uint8_t address)
+magnet::magnet(uint8_t addr) :
+addr(addr)
 {
-    addr = address;
     WriteByte(addr, 0x20, 0xDC); //F0
     WriteByte(addr, 0x21, 0x20); //00
     WriteByte(addr, 0x22, 0x00); //default 0x00
@@ -54,7 +54,8 @@ Magnet_data magnet::ReadData()
     return values;
 }
 
-void magnet::AssignValues(Magnet_data data){
+void magnet::AssignValues(Magnet_data data)
+{
     x = data.val_x;
     y = data.val_y;
     z = data.val_z;

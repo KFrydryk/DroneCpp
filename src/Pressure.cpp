@@ -1,8 +1,8 @@
 #include "Pressure.h"
 
-Pressure::Pressure(uint8_t address)
+Pressure::Pressure(uint8_t addr) :
+addr(addr)
 {
-    addr = address;
     WriteByte(addr, 0x10, 0x0F); //09
     WriteByte(addr, 0x20, 0xC2); //42
     WriteByte(addr, 0x21, 0x10); //00

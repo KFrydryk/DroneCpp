@@ -12,12 +12,12 @@
 
 #include "comm.h"
 
-typedef struct {
+typedef struct
+{
     float alt;
     float hPa;
     float t;
 } Pressure_data;
-
 
 class Pressure : I2C_comm
 {
@@ -27,10 +27,13 @@ public:
     float t;
     uint8_t addr;
 
-    Pressure(uint8_t address);
+public:
+    Pressure(uint8_t addr);
     float ReadTemp();
     float ReadhPa();
     float ReadAltitude(float pressure_mbar);
     Pressure_data ReadData();
+
+private:
     void AssignValues(Pressure_data data);
 };

@@ -8,9 +8,9 @@ uint8_t Accelerometer::WhoAmI()
     return ReadByte(addr, 0x0F); //0x0f
 }
 
-Accelerometer::Accelerometer(uint8_t addres)
+Accelerometer::Accelerometer(uint8_t addr) :
+addr(addr)
 {
-    addr = addres;
     WriteByte(addr, 0x10, 0x68); //0x80 88
     //	uint8_t data = ReadByte(ACCELEROMETER_ADDR, 0x10);
     //	printf("data: %02x", data);

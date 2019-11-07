@@ -29,9 +29,10 @@ public:
     float z;
     short t;
 
+private:
     enum
     {
-        MAGNET_ADDR = 0x1E,
+        //MAGNET_ADDR = 0x1E, - not used
         MAGNET_X_AXIS = 0x28,
         MAGNET_Y_AXIS = 0x2A,
         MAGNET_Z_AXIS = 0x2C,
@@ -44,11 +45,14 @@ public:
           M_Y_MIN = -0.399298f,
           M_Z_MIN = -0.068109f;
 
-    magnet(uint8_t address);
+public:
+    magnet(uint8_t addr);
     void TurnTempSensor(bool sensorOn);
     short ReadTemp();
     short ReadAxis(uint8_t axis);
     Magnet_data ReadData();
-    void AssignValues(Magnet_data data);
     Magnet_data Calibrate();
+
+private:
+    void AssignValues(Magnet_data data);
 };

@@ -7,6 +7,7 @@
 #include "esp_spi_flash.h"
 #include "sys/time.h"
 #include "driver/i2c.h"
+#include "driver/mcpwm.h"
 #include "esp_log.h"
 #include <stdbool.h>
 #include "math.h"
@@ -31,3 +32,12 @@ protected:
     int64_t GetCurrentTime();
 };
 // namespace comm
+
+class PWM_comm
+{
+protected:
+    mcpwm_config_t pwm_config;
+
+public:
+    PWM_comm();
+};

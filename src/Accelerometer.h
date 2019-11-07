@@ -40,6 +40,16 @@ typedef struct
 class Accelerometer : I2C_comm
 {
 public:
+    uint8_t addr;
+    float aX;
+    float aY;
+    float aZ;
+    float gX;
+    float gY;
+    float gZ;
+    short t;
+
+private:
     enum
     {
         ACCELEROMETER_X_AXIS = 0x28,
@@ -53,26 +63,19 @@ public:
           GYROSCOPE_SCALE = 35.0f,
           UNIT_SCALE = 1000.0f;
 
-    uint8_t addr;
-
-    float aX;
-    float aY;
-    float aZ;
-    float gX;
-    float gY;
-    float gZ;
-    short t;
-
     int64_t acc_lastTick = 0;
     int64_t acc_currentTick = 0;
     Accelerometer_data accelerometer_calib_data = {0, 0, 0, 0, 0, 0, 0};
 
-    Accelerometer(uint8_t addres);
+public:
+    Accelerometer(uint8_t addr);
     void Calib();
     uint8_t WhoAmI();
     short ReadAxis(uint8_t axis);
     short ReadTemp();
     Accelerometer_data ReadData();
+
+private:
     void AssignValues(Accelerometer_data data);
 };
 
