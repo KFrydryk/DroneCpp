@@ -13,12 +13,22 @@
 #include "Accelerometer.h"
 #include "magnet.h"
 #include "Pressure.h"
+#include "drone.h"
 
-#define ACCELEROMETER_ADDR  0x6B
-#define MAGNET_ADDR         0x1E
-#define PRESSURE_ADDR		0x5D
+// #define ACCELEROMETER_ADDR  0x6B
+// #define MAGNET_ADDR         0x1E
+// #define PRESSURE_ADDR		0x5D
 
 using namespace std;
+
+
+int64_t GetTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
+}
+
 
 extern "C"
 {
@@ -29,21 +39,26 @@ void app_main(void)
 {
     printf("zaczynam");
 
-    Accelerometer Acc(ACCELEROMETER_ADDR);
-      printf("zaczynam2 \n");
-    magnet Mag(MAGNET_ADDR);
-      printf("zaczynam3 \n");
-    Pressure Press(PRESSURE_ADDR);
-    printf("zaczynam4 \n");
+  int64_t Curr_Time = 0;
+  int64_t Last_Time = 0;
 
-    Mag.TurnTempSensor(true);
-    printf("wchodze do while");
+    drone dron;
+    
+    float aaa;
     while (true)
     {
-        Acc.ReadData();
-        Mag.ReadData();
-        Press.ReadData();
-        printf("accX: %f magX: %f, pres: %f \n", Acc.aX, Mag.x, Press.alt);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+       Curr_Time = GetTime();
+        dron.CalcPosition();
+       
+       // vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //dron.SetSpeed(0, 0, 0, 0);
+        // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
+        // printf("duty %f \n", aaa);
+        dron.P_Roll(dron.Roll);
+        if(Curr_Time-Last_Time > 500){
+          printf("R: %f, P: %f, Y: %f \n", dron.Roll, dron.Pitch, dron.Yaw);
+          Last_Time = Curr_Time;
+        }
+        //bl br fr fl
     }
 }

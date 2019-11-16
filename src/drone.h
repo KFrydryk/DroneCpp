@@ -1,5 +1,6 @@
 #pragma once
 
+#include "math.h"
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -10,17 +11,49 @@
 #include <stdbool.h>
 #include "math.h"
 
+#include "utils.h"
 #include "motor.h"
 #include "Accelerometer.h"
 #include "magnet.h"
 #include "Pressure.h"
+#include "comm.h"
 
 
-class drone{
-motor FR;
-motor FL;
-motor RR;
-motor RL;
 
-drone();
+class drone
+{
+    uint8_t accelerometer_addr = 0x6B;
+    uint8_t magnet_addr = 0x1E;
+    uint8_t pressure_addr = 0x5D;
+
+    motor *FR;
+    motor *FL;
+    motor *RR;
+    motor *RL;
+
+    Accelerometer* Acc;
+    magnet* Mag;
+    Pressure* Press;
+
+    int64_t CurrentTime = 0;
+    int64_t LastTime = 0;
+
+    bool gyroSet = false;
+    
+    float integral = 0;
+    int64_t RegCurrTime = 0;
+    int64_t RegLastTime = 0;
+public:
+    
+    float Roll = 0;
+    float Pitch = 0;
+    float Yaw = 0;
+
+    drone();
+
+    void CalcPosition();
+
+    void SetSpeed(int vel1, int vel2, int vel3, int vel4);
+
+    void P_Roll(float roll);
 };

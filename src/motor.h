@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "math.h"
 
+#include "utils.h"
 #include "comm.h"
 
 class motor : PWM_comm

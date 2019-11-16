@@ -28,6 +28,7 @@ public:
     float y;
     float z;
     short t;
+    float Zero = 0;
 
 private:
     enum

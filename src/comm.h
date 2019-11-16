@@ -28,8 +28,8 @@ protected:
     I2C_comm();
     void WriteByte(uint8_t addr, uint8_t sub, uint8_t data);
     uint8_t ReadByte(uint8_t addr, uint8_t sub);
-
-    int64_t GetCurrentTime();
+public:
+    //int64_t GetCurrentTime();
 };
 // namespace comm
 

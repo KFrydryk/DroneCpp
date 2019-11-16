@@ -52,20 +52,13 @@ uint8_t I2C_comm::ReadByte(uint8_t addr, uint8_t sub)
     return data;
 }
 
-int64_t I2C_comm::GetCurrentTime()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
-}
-
 PWM_comm::PWM_comm()
 {
-    static bool MotorPWM_initialised = false;
+   // static bool MotorPWM_initialised = false;
 
-    if (!MotorPWM_initialised)
-    {
-        MotorPWM_initialised = true;
+   // if (!MotorPWM_initialised)
+   // {
+   //     MotorPWM_initialised = true;
 
         uint32_t angle, count;
         pwm_config.frequency = 200; //frequency = 50Hz, i.e. for every servo motor time period should be 20ms
@@ -73,5 +66,5 @@ PWM_comm::PWM_comm()
         pwm_config.cmpr_b = 0;      //duty cycle of PWMxb = 0
         pwm_config.counter_mode = MCPWM_UP_COUNTER;
         pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
-    }
+  //  }
 }
