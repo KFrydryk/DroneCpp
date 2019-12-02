@@ -76,8 +76,8 @@ void drone::CalcPosition()
 
 void drone::P_Roll(float roll)
 {
-    float KP = 1;
-    float KI = 0.1;
+    float KP = 0.5;
+    float KI = 0.001;
     RegCurrTime = GetCurrentTime();
     integral += roll * (RegCurrTime - RegLastTime);
 
