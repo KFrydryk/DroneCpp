@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include "math.h"
 
-
 #include "Accelerometer.h"
 #include "magnet.h"
 #include "Pressure.h"
@@ -24,43 +23,50 @@
 
 using namespace std;
 
-
 extern "C"
 {
-  void app_main(void);
+    void app_main(void);
 }
 
+void printtask(void *parameters)
+{
+    printf("jestem w tasku");
+    vTaskDelete(NULL);
+}
 
 void app_main(void)
 {
 
-  printf("zaczynam");
+    printf("zaczynam");
 
-  int64_t Curr_Time = 0;
-  int64_t Last_Time = 0;
+    //xTaskCreate(printtask, "printtask", 1000, NULL, 1, NULL);
 
-  drone dron;
+    int64_t Curr_Time = 0;
+    int64_t Last_Time = 0;
 
-  WifiStart();
+    drone dron;
 
-  float aaa;
-  while (true)
-  {
-    Curr_Time = GetCurrentTime();
-    dron.CalcPosition();
+    WifiStart();
+    printf("costamblabla \n");
+    startSocket();
+    float aaa;
+    while (true)
+    {
+        Curr_Time = GetCurrentTime();
+        dron.CalcPosition();
 
-    // vTaskDelay(1000 / portTICK_PERIOD_MS);
-    dron.SetSpeed(0, 0, 0, 0);
-    // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
-    // printf("duty %f \n", aaa);
-    //dron.P_Roll(dron.Roll);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+        dron.SetSpeed(0, 0, 0, 0);
+        // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
+        // printf("duty %f \n", aaa);
+        //dron.P_Roll(dron.Roll);
 
-    // if (Curr_Time - Last_Time > 500)
-    // {
-    //   printf("R: %f, P: %f, Y: %f \n", dron.Roll, dron.Pitch, dron.Yaw);
-    //   Last_Time = Curr_Time;
-    // }
+        // if (Curr_Time - Last_Time > 500)
+        // {
+        //   printf("R: %f, P: %f, Y: %f \n", dron.Roll, dron.Pitch, dron.Yaw);
+        //   Last_Time = Curr_Time;
+        // }
 
-    //bl br fr fl
-  }
+        //bl br fr fl
+    }
 }
