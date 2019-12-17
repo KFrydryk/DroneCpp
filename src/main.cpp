@@ -34,6 +34,7 @@ void printtask(void *parameters)
     vTaskDelete(NULL);
 }
 
+
 void app_main(void)
 {
 
@@ -49,13 +50,31 @@ void app_main(void)
     WifiStart();
     printf("costamblabla \n");
     startSocket();
-    float aaa;
+    extern xQueueHandle wifiRxQueue;
+    extern xQueueHandle wifiTxQueue;
+    recSockStruct receivedData;
+    sendSockStruct sendData;
     while (true)
     {
+        sendData = {5, 5, 8};
+
+        if (uxQueueMessagesWaiting(wifiTxQueue) < 10){
+             if (xQueueSendToBack(wifiTxQueue, (void *)&sendData, (TickType_t)10) != pdPASS)
+                {
+                    ESP_LOGE("sendSocket", "couldn't send data to socket task");
+                }
+        }
+        //printf("sendQueue length: %d \n", uxQueueMessagesWaiting(wifiTxQueue));
+
+        if (uxQueueMessagesWaiting(wifiRxQueue) != 0)
+        {
+            xQueueReceive(wifiRxQueue, &(receivedData), (TickType_t)0);
+            printf("Main task got: %f, %f, %f \n", receivedData.P, receivedData.I, receivedData.D);
+        }
         Curr_Time = GetCurrentTime();
         dron.CalcPosition();
 
-        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
         dron.SetSpeed(0, 0, 0, 0);
         // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
         // printf("duty %f \n", aaa);

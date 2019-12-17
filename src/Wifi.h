@@ -27,16 +27,32 @@
 
 
 #define SSID "Jezus cie widzi 2.4"
-#define PASS "lubieplacki"
+#define PASS  "lubieplacki"
 
 #define HOST_IP_ADDR "192.168.0.107"
 #define PORT 8080
 
 
-esp_err_t event_handler(void *ctx, system_event_t *event);
 
-void WifiStart();
+    typedef struct
+    {
+        float P;
+        float I;
+        float D;
+    } recSockStruct;
 
-void tcp_client_task(void *pvParameters);
+        typedef struct
+    {
+        float R;
+        float P;
+        float Y;
+    } sendSockStruct;
 
-void startSocket();
+    esp_err_t event_handler(void *ctx, system_event_t *event);
+
+    void WifiStart();
+
+    void tcp_client_task(void *pvParameters);
+    void wait_for_ip();
+
+    void startSocket();

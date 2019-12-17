@@ -1,17 +1,18 @@
 #include "Wifi.h"
 
-static const char *payload = "zadzialaj w koncu chujcu";
+const char *payload = "zadzialaj w koncu chujcu";
 
 const int WIFI_CONNECTED_BIT = BIT0;
 
-static const char *TAG = "websocket ";
-static const char *WIFITAG = "wifi ";
+const char *TAG = "websocket ";
+const char *WIFITAG = "wifi ";
 
-static int s_retry_num = 0;
+int s_retry_num = 0;
 
-static EventGroupHandle_t s_wifi_event_group;
+EventGroupHandle_t s_wifi_event_group;
 
-
+xQueueHandle wifiRxQueue;
+xQueueHandle wifiTxQueue;
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
@@ -66,8 +67,6 @@ void WifiStart()
     //init default wifi config
     wifi_init_config_t wifiInitializationConfig = WIFI_INIT_CONFIG_DEFAULT();
 
-
-
     ESP_ERROR_CHECK(esp_wifi_init(&wifiInitializationConfig));
 
     esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -94,18 +93,19 @@ void WifiStart()
     ESP_LOGI(WIFITAG, "wifi_init_sta finished.");
 }
 
-
-
 void tcp_client_task(void *pvParameters)
 {
     printf("starting client task \n");
-    char rx_buffer[128];
+    //char rx_buffer[128];
     char addr_str[128];
+    recSockStruct receivedData;
+    sendSockStruct sendData;
     int addr_family;
     int ip_protocol;
 
-    while (1) {
-
+    while (1)
+    {
+        //
         struct sockaddr_in destAddr;
         destAddr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
         destAddr.sin_family = AF_INET;
@@ -114,64 +114,89 @@ void tcp_client_task(void *pvParameters)
         ip_protocol = IPPROTO_IP;
         inet_ntoa_r(destAddr.sin_addr, addr_str, sizeof(addr_str) - 1);
 
-        int sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
-        if (sock < 0) {
+        int sock = socket(addr_family, SOCK_STREAM, ip_protocol);
+        if (sock < 0)
+        {
             ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
             break;
         }
         ESP_LOGI(TAG, "Socket created");
 
         int err = connect(sock, (struct sockaddr *)&destAddr, sizeof(destAddr));
-        if (err != 0) {
+        if (err != 0)
+        {
             ESP_LOGE(TAG, "Socket unable to connect: errno %d", errno);
             break;
         }
         ESP_LOGI(TAG, "Successfully connected");
+        //fcntl(sock, O_NONBLOCK, 0);
+        //
+        while (1)
+        {
+            //f f f
+           
+            if (uxQueueMessagesWaiting(wifiTxQueue) != 0)
+            {
+               // printf("chcialbym wyslac: %d \n", uxQueueMessagesWaiting(wifiTxQueue));
+                xQueueReceive(wifiTxQueue, &(sendData), (TickType_t)0);
 
-        while (1) {
-            int err = send(sock, payload, strlen(payload), 0);
-            if (err < 0) {
-                ESP_LOGE(TAG, "Error occured during sending: errno %d", errno);
-                break;
+                int err = send(sock, &sendData, sizeof(sendData), 0);
+                if (err < 0)
+                {
+                    ESP_LOGE(TAG, "Error occured during sending: errno %d", errno);
+                    break;
+                }
+
+                //}
+
+                //printf("jestem przed \n");
+                int len = recv(sock, &receivedData, sizeof(receivedData), 0); //-1
+                //printf("doszedlem \n");
+                // Error occured during receiving
+                if (len < 0)
+                {
+                    ESP_LOGE(TAG, "recv failed: errno %d", errno);
+                    //break;
+                }
+                // Data received
+                else
+                {
+                    //rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
+                    ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
+                    ESP_LOGI(TAG, "%f, %f, %f", receivedData.P, receivedData.I, receivedData.D);
+                    if (xQueueSendToBack(wifiRxQueue, (void *)&receivedData, (TickType_t)10) != pdPASS)
+                    {
+                        ESP_LOGE(TAG, "couldn't send received data to main task");
+                    }
+                }
             }
 
-            int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-            // Error occured during receiving
-            if (len < 0) {
-                ESP_LOGE(TAG, "recv failed: errno %d", errno);
-                break;
-            }
-            // Data received
-            else {
-                rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-                ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                ESP_LOGI(TAG, "%s", rx_buffer);
-            }
-
-            vTaskDelay(2000 / portTICK_PERIOD_MS);
+            // //vTaskDelay(200 / portTICK_PERIOD_MS);
         }
-
-        if (sock != -1) {
+        if (sock != -1)
+        {
             ESP_LOGE(TAG, "Shutting down socket and restarting...");
             shutdown(sock, 0);
             close(sock);
+            //break;
         }
     }
     vTaskDelete(NULL);
 }
 
-
-static void wait_for_ip()
+void wait_for_ip()
 {
-    uint32_t bits = WIFI_CONNECTED_BIT ;
-
     ESP_LOGI(TAG, "Waiting for AP connection...");
     xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, false, true, portMAX_DELAY);
     ESP_LOGI(TAG, "Connected to AP");
 }
 
-void startSocket(){
+void startSocket()
+{
     printf("\n \nstarting socket \n \n\n");
     wait_for_ip();
+
+    wifiRxQueue = xQueueCreate(10, sizeof(recSockStruct));
+    wifiTxQueue = xQueueCreate(10, sizeof(sendSockStruct));
     xTaskCreate(tcp_client_task, "tcp_client", 4096, NULL, 1, NULL);
 }
