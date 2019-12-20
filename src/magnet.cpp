@@ -3,10 +3,10 @@
 magnet::magnet(uint8_t addr) :
 addr(addr)
 {
-    WriteByte(addr, 0x20, 0xDC); //F0
+    WriteByte(addr, 0x20, 0x02); //F0 DC - temp sensor on, hih performance mode, 80HZ, fast mode off, no self test. 02- 1000hz
     WriteByte(addr, 0x21, 0x20); //00
     WriteByte(addr, 0x22, 0x00); //default 0x00
-    WriteByte(addr, 0x23, 0x08); //0c
+    WriteByte(addr, 0x23, 0x0c); //0c
 }
 
 void magnet::TurnTempSensor(bool sensorOn)

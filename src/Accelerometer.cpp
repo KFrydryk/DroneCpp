@@ -11,10 +11,10 @@ uint8_t Accelerometer::WhoAmI()
 Accelerometer::Accelerometer(uint8_t addr) :
 addr(addr)
 {
-    WriteByte(addr, 0x10, 0x68); //0x80 88
+    WriteByte(addr, 0x10, 0x88); //0x80 88-1,66khz 0x68-416Hz
     //	uint8_t data = ReadByte(ACCELEROMETER_ADDR, 0x10);
     //	printf("data: %02x", data);
-    WriteByte(addr, 0x11, 0x68); //0x80 88
+    WriteByte(addr, 0x11, 0x88); //0x80 88 - -1,66khz 0x68-416Hz
     WriteByte(addr, 0x12, 0x04); //0x04
     WriteByte(addr, 0x13, 0x00); //0x00 80
     WriteByte(addr, 0x14, 0x00); //0x00

@@ -134,10 +134,10 @@ void tcp_client_task(void *pvParameters)
         while (1)
         {
             //f f f
-           
+
             if (uxQueueMessagesWaiting(wifiTxQueue) != 0)
             {
-               // printf("chcialbym wyslac: %d \n", uxQueueMessagesWaiting(wifiTxQueue));
+                // printf("chcialbym wyslac: %d \n", uxQueueMessagesWaiting(wifiTxQueue));
                 xQueueReceive(wifiTxQueue, &(sendData), (TickType_t)0);
 
                 int err = send(sock, &sendData, sizeof(sendData), 0);
@@ -162,8 +162,8 @@ void tcp_client_task(void *pvParameters)
                 else
                 {
                     //rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-                    ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                    ESP_LOGI(TAG, "%f, %f, %f", receivedData.P, receivedData.I, receivedData.D);
+                    //ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
+                    //ESP_LOGI(TAG, "%f, %f, %f", receivedData.P, receivedData.I, receivedData.D);
                     if (xQueueSendToBack(wifiRxQueue, (void *)&receivedData, (TickType_t)10) != pdPASS)
                     {
                         ESP_LOGE(TAG, "couldn't send received data to main task");
@@ -199,4 +199,24 @@ void startSocket()
     wifiRxQueue = xQueueCreate(10, sizeof(recSockStruct));
     wifiTxQueue = xQueueCreate(10, sizeof(sendSockStruct));
     xTaskCreate(tcp_client_task, "tcp_client", 4096, NULL, 1, NULL);
+}
+
+recSockStruct sockSendReceive(sendSockStruct sendData)
+{
+    recSockStruct receivedData;
+    if (uxQueueMessagesWaiting(wifiTxQueue) < 10)
+    {
+        if (xQueueSendToBack(wifiTxQueue, (void *)&sendData, (TickType_t)10) != pdPASS)
+        {
+            ESP_LOGE("sendSocket", "couldn't send data to socket task");
+        }
+    }
+    //printf("sendQueue length: %d \n", uxQueueMessagesWaiting(wifiTxQueue));
+
+    if (uxQueueMessagesWaiting(wifiRxQueue) != 0)
+    {
+        xQueueReceive(wifiRxQueue, &(receivedData), (TickType_t)0);
+        //printf("Main task got: %f, %f, %f \n", receivedData.P, receivedData.I, receivedData.D);
+    }
+    return receivedData;
 }

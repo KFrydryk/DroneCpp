@@ -24,7 +24,7 @@ void drone::SetSpeed(int velFR, int velFL, int velRR, int velRL)
 
 void drone::CalcPosition()
 {
-
+    ExecLastTime = GetCurrentTime();
     float Acc_total_vec = 0;
     float Acc_roll;
     float Acc_pitch;
@@ -35,7 +35,10 @@ void drone::CalcPosition()
 
     Acc->ReadData();
     Mag->ReadData();
+    if (PressureReadFrequency++ > 10){ 
     Press->ReadData();
+    PressureReadFrequency = 0;
+    }
 
     CurrentTime = GetCurrentTime();
 
@@ -72,12 +75,13 @@ void drone::CalcPosition()
     }
 
     LastTime = CurrentTime;
+    ExecCurrTime = GetCurrentTime();
+    printf("Exec time: %ld \n", (long)(ExecCurrTime-ExecLastTime));
+ 
 }
 
 void drone::P_Roll(float roll)
 {
-    float KP = 0.5;
-    float KI = 0.001;
     RegCurrTime = GetCurrentTime();
     integral += roll * (RegCurrTime - RegLastTime);
 
@@ -90,7 +94,7 @@ void drone::P_Roll(float roll)
         integral = -20;
     }
 
-    float u = KP * roll + KI*integral;
+    float u = RollP * roll + RollI*integral;
     if (u > 30)
     {
         u = 30;

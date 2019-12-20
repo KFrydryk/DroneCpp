@@ -43,11 +43,20 @@ class drone
     float integral = 0;
     int64_t RegCurrTime = 0;
     int64_t RegLastTime = 0;
+
+    int PressureReadFrequency = 0;
+
+    int64_t ExecCurrTime = 0;
+    int64_t ExecLastTime = 0;
 public:
     
     float Roll = 0;
     float Pitch = 0;
     float Yaw = 0;
+
+    float RollP = 0;
+    float RollI = 0;
+    float RollD = 0;
 
     drone();
 

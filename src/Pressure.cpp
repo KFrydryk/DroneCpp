@@ -3,7 +3,7 @@
 Pressure::Pressure(uint8_t addr) :
 addr(addr)
 {
-    WriteByte(addr, 0x10, 0x0F); //09
+    WriteByte(addr, 0x10, 0x00); //09 0f - 512 internal averages, 00 - 8
     WriteByte(addr, 0x20, 0xC2); //42
     WriteByte(addr, 0x21, 0x10); //00
     WriteByte(addr, 0x2E, 0xC7); //C7-8avgmean
@@ -47,7 +47,7 @@ Pressure_data Pressure::ReadData()
 {
     float press = ReadhPa();
     float altitude = ReadAltitude(press);
-    float temperature = ReadTemp();
+    float temperature = 0; //ReadTemp();
     Pressure_data data = {altitude, press, temperature};
     AssignValues(data);
     return data;

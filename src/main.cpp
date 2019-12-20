@@ -34,7 +34,6 @@ void printtask(void *parameters)
     vTaskDelete(NULL);
 }
 
-
 void app_main(void)
 {
 
@@ -44,47 +43,45 @@ void app_main(void)
 
     int64_t Curr_Time = 0;
     int64_t Last_Time = 0;
+    int64_t Curr_Delay_Time = 0;
+    int64_t Last_Delay_Time = 0;
 
     drone dron;
 
     WifiStart();
     printf("costamblabla \n");
     startSocket();
-    extern xQueueHandle wifiRxQueue;
-    extern xQueueHandle wifiTxQueue;
-    recSockStruct receivedData;
+    recSockStruct gotData;
     sendSockStruct sendData;
     while (true)
     {
-        sendData = {5, 5, 8};
-
-        if (uxQueueMessagesWaiting(wifiTxQueue) < 10){
-             if (xQueueSendToBack(wifiTxQueue, (void *)&sendData, (TickType_t)10) != pdPASS)
-                {
-                    ESP_LOGE("sendSocket", "couldn't send data to socket task");
-                }
-        }
-        //printf("sendQueue length: %d \n", uxQueueMessagesWaiting(wifiTxQueue));
-
-        if (uxQueueMessagesWaiting(wifiRxQueue) != 0)
-        {
-            xQueueReceive(wifiRxQueue, &(receivedData), (TickType_t)0);
-            printf("Main task got: %f, %f, %f \n", receivedData.P, receivedData.I, receivedData.D);
-        }
+        //printf("%f, %f, %f \n", gotData.P, gotData.I, gotData.D);
         Curr_Time = GetCurrentTime();
         dron.CalcPosition();
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        dron.SetSpeed(0, 0, 0, 0);
+        //vTaskDelay(1000 / portTICK_PERIOD_MS);
         // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
         // printf("duty %f \n", aaa);
-        //dron.P_Roll(dron.Roll);
+        sendData = {dron.Roll, dron.Pitch, dron.Yaw};
+        gotData = sockSendReceive(sendData);
+        dron.RollP = gotData.P;
+        dron.RollI = gotData.I;
+        dron.RollD = gotData.D;
 
-        // if (Curr_Time - Last_Time > 500)
-        // {
-        //   printf("R: %f, P: %f, Y: %f \n", dron.Roll, dron.Pitch, dron.Yaw);
-        //   Last_Time = Curr_Time;
-        // }
+        dron.P_Roll(dron.Roll);
+        if (gotData.P == 0)
+        {
+            dron.SetSpeed(0, 0, 0, 0);
+        }
+        Last_Delay_Time = Curr_Time;
+        Curr_Delay_Time = GetCurrentTime();
+        printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
+        if (Curr_Time - Last_Time > 500)
+        {
+            //printf("R: %f, P: %f, Y: %f \n", dron.Roll, dron.Pitch, dron.Yaw);
+
+            Last_Time = Curr_Time;
+        }
 
         //bl br fr fl
     }

@@ -56,3 +56,5 @@
     void wait_for_ip();
 
     void startSocket();
+
+    recSockStruct sockSendReceive(sendSockStruct sendData);
