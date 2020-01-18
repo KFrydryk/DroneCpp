@@ -9,6 +9,7 @@
 #include "esp_log.h"
 #include <stdbool.h>
 #include "math.h"
+#include "esp_timer.h"
 
 #include "Accelerometer.h"
 #include "magnet.h"
@@ -69,16 +70,18 @@ void app_main(void)
         dron.RollD = gotData.D;
 
         dron.P_Roll(dron.Roll);
-        if (gotData.P == 0)
+        if (dron.RollP == 0)
         {
             dron.SetSpeed(0, 0, 0, 0);
         }
         Last_Delay_Time = Curr_Time;
         Curr_Delay_Time = GetCurrentTime();
-        printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
+        //printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
         if (Curr_Time - Last_Time > 500)
         {
-            //printf("R: %f, P: %f, Y: %f \n", dron.Roll, dron.Pitch, dron.Yaw);
+                //int64_t time_since_boot = esp_timer_get_time();
+                //printf("time: %f \n", (float)(time_since_boot/1000));
+            //printf("P: %f, I: %f, D: %f \n", gotData.P, dron.RollI, dron.RollD);
 
             Last_Time = Curr_Time;
         }

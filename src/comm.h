@@ -14,7 +14,7 @@
 
 #define I2C_SCL_IO 19          //19               /*!< gpio number for I2C master clock */
 #define I2C_SDA_IO 18          //18               /*!< gpio number for I2C master data  */
-#define I2C_FREQ_HZ 100000     /*!< I2C master clock frequency */
+#define I2C_FREQ_HZ 400000     /*!< I2C master clock frequency */
 #define I2C_PORT_NUM I2C_NUM_1 /*!< I2C port number for master dev */
 #define I2C_TX_BUF_DISABLE 0   /*!< I2C master do not need buffer */
 #define I2C_RX_BUF_DISABLE 0   /*!< I2C master do not need buffer */
@@ -28,6 +28,7 @@ protected:
     I2C_comm();
     void WriteByte(uint8_t addr, uint8_t sub, uint8_t data);
     uint8_t ReadByte(uint8_t addr, uint8_t sub);
+    uint8_t ReadMulti(uint8_t addr, uint8_t sub, uint8_t *value, uint8_t num = 1);
 public:
     //int64_t GetCurrentTime();
 };

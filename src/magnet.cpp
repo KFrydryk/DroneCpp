@@ -7,6 +7,7 @@ addr(addr)
     WriteByte(addr, 0x21, 0x20); //00
     WriteByte(addr, 0x22, 0x00); //default 0x00
     WriteByte(addr, 0x23, 0x0c); //0c
+    WriteByte(addr, 0x24, 0x80); //0x00  
 }
 
 void magnet::TurnTempSensor(bool sensorOn)
@@ -26,30 +27,31 @@ void magnet::TurnTempSensor(bool sensorOn)
 short magnet::ReadTemp()
 {
     uint8_t regs[2];
-    regs[0] = ReadByte(addr, 0x2e);
-    regs[1] = ReadByte(addr, 0x2f);
+    ReadMulti(addr, 0x2e, regs, 2);
     return (((short)((regs[1] << 8) | regs[0])) >> 3) + 25;
-}
-
-short magnet::ReadAxis(uint8_t axis)
-{
-    uint8_t regs[2];
-    regs[0] = ReadByte(addr, axis);
-    regs[1] = ReadByte(addr, axis + 1); //&0x80
-    return (((short)((regs[1] << 8) | regs[0])));
 }
 
 Magnet_data magnet::ReadData()
 {
-    while ((ReadByte(addr, 0x27) & 0x08) == 0)
-    {
-        vTaskDelay(portTICK_PERIOD_MS);
-    }
-    float x_axis = (float)ReadAxis(MAGNET_X_AXIS) / MAGNET_SCALE - (M_X_MAX + M_X_MIN) / 2; // - X_BIAS;
-    float y_axis = (float)ReadAxis(MAGNET_Y_AXIS) / MAGNET_SCALE - (M_Y_MAX + M_Y_MIN) / 2; // - Y_BIAS;
-    float z_axis = (float)ReadAxis(MAGNET_Z_AXIS) / MAGNET_SCALE - (M_Z_MAX + M_Z_MIN) / 2; // - Z_BIAS;
-    short temp = ReadTemp();
+    //int64_t ExecLastTime = esp_timer_get_time();
+    //int64_t ExecCurrTime = 0;
+
+    uint8_t regs[6];
+    ReadMulti(addr, MAGNET_X_AXIS, regs, 3);
+    short xReading = (((short)((regs[1] << 8) | 0x0))); // regs[0])));
+    short yReading = (((short)((regs[2] << 8) | 0x0))); //regs[2])));
+    short zReading = (((short)((regs[3] << 8) | 0x0))); //regs[4])));
+
+    float x_axis = (float)xReading / MAGNET_SCALE - (M_X_MAX + M_X_MIN) / 2; // - X_BIAS;
+    float y_axis = (float)yReading / MAGNET_SCALE - (M_Y_MAX + M_Y_MIN) / 2; // - Y_BIAS;
+    float z_axis = (float)zReading / MAGNET_SCALE - (M_Z_MAX + M_Z_MIN) / 2; // - Z_BIAS;
+
+    short temp = 0;
     Magnet_data values = {x_axis, y_axis, z_axis, temp};
+
+    //ExecCurrTime = esp_timer_get_time();
+    //printf("Exec time: %f \n", (float)(ExecCurrTime-ExecLastTime));
+
     AssignValues(values);
     return values;
 }
