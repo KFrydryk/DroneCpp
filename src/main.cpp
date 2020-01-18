@@ -57,7 +57,7 @@ void app_main(void)
     while (true)
     {
         //printf("%f, %f, %f \n", gotData.P, gotData.I, gotData.D);
-        Curr_Time = GetCurrentTime();
+        Curr_Time = esp_timer_get_time()/1000;
         dron.CalcPosition();
 
         //vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -75,7 +75,7 @@ void app_main(void)
             dron.SetSpeed(0, 0, 0, 0);
         }
         Last_Delay_Time = Curr_Time;
-        Curr_Delay_Time = GetCurrentTime();
+        Curr_Delay_Time = esp_timer_get_time()/1000;
         //printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
         if (Curr_Time - Last_Time > 500)
         {

@@ -70,7 +70,7 @@ short Accelerometer::ReadTemp()
 Accelerometer_data Accelerometer::ReadData()
 {
     //acc_lastTick = acc_currentTick;
-    //acc_currentTick = GetCurrentTime();
+    //acc_currentTick = esp_timer_get_time()/1000;
     while ((ReadByte(addr, 0x1E) & 0x07) == 0)
     {
         //uint8_t acc_name = Accelerometer_who_am_i(ACCELEROMETER_ADDR);

@@ -42,7 +42,7 @@ void drone::CalcPosition()
     PressureReadFrequency = 0;
     }
   
-    CurrentTime = GetCurrentTime();
+    CurrentTime = esp_timer_get_time()/1000;
 
     Roll += (Acc->gX * (CurrentTime - LastTime) / 1000);
 
@@ -84,7 +84,7 @@ void drone::CalcPosition()
 
 void drone::P_Roll(float roll)
 {
-    RegCurrTime = GetCurrentTime();
+    RegCurrTime = esp_timer_get_time()/1000;
     integral += roll * (RegCurrTime - RegLastTime)/1000;
 
     if (integral > 20)
