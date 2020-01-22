@@ -69,21 +69,44 @@ short Accelerometer::ReadTemp()
 
 Accelerometer_data Accelerometer::ReadData()
 {
-    //acc_lastTick = acc_currentTick;
-    //acc_currentTick = esp_timer_get_time()/1000;
-    while ((ReadByte(addr, 0x1E) & 0x07) == 0)
-    {
-        //uint8_t acc_name = Accelerometer_who_am_i(ACCELEROMETER_ADDR);
-        //printf("%08x", acc_name);
-        vTaskDelay(portTICK_PERIOD_MS);
-    }
-    float accel_x_axis = (float)ReadAxis(ACCELEROMETER_X_AXIS) * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - X_BIAS;
-    float accel_y_axis = (float)ReadAxis(ACCELEROMETER_Y_AXIS) * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - Y_BIAS;
-    float accel_z_axis = (float)ReadAxis(ACCELEROMETER_Z_AXIS) * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - Z_BIAS;
-    float gyro_x_axis = (float)ReadAxis(GYROSCOPE_X_AXIS) * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_x; // - Z_BIAS;
-    float gyro_y_axis = (float)ReadAxis(GYROSCOPE_Y_AXIS) * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_y; // - Z_BIAS;
-    float gyro_z_axis = (float)ReadAxis(GYROSCOPE_Z_AXIS) * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_z; // - Z_BIAS;
-    short temp = ReadTemp();
+    // while ((ReadByte(addr, 0x1E) & 0x07) == 0)
+    // {
+    //     //uint8_t acc_name = Accelerometer_who_am_i(ACCELEROMETER_ADDR);
+    //     //printf("%08x", acc_name);
+    //     vTaskDelay(portTICK_PERIOD_MS);
+    // }
+
+    //int64_t ExecLastTime = esp_timer_get_time();
+
+    uint8_t regs[12];
+    ReadMulti(addr, GYROSCOPE_X_AXIS, regs, 12);
+    short gyroxval = (((short)((regs[1] << 8) | regs[0])));
+    short gyroyval = (((short)((regs[3] << 8) | regs[2])));
+    short gyrozval = (((short)((regs[5] << 8) | regs[4])));
+    short accelxval = (((short)((regs[7] << 8) | regs[6]))); // (((short)((regs[7] << 8) | regs[6])));
+    short accelyval = (((short)((regs[9] << 8) | regs[8]))); //(((short)((regs[9] << 8) | regs[8])));
+    short accelzval = (((short)((regs[11] << 8) | regs[10]))); // (((short)((regs[11] << 8) | regs[10])));
+
+    float accel_x_axis = (float)accelxval * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - X_BIAS;
+    float accel_y_axis = (float)accelyval * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - Y_BIAS;
+    float accel_z_axis = (float)accelzval * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - Z_BIAS;
+    float gyro_x_axis = (float)gyroxval * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_x; // - Z_BIAS;
+    float gyro_y_axis = (float)gyroyval * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_y; // - Z_BIAS;
+    float gyro_z_axis = (float)gyrozval * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_z; // - Z_BIAS;
+    
+    //printf("gx: %5f \t| gy %5f\t|  gz %5f\t|  ax %5f\t|  ay %5f\t| az %5f\t|   ", gyro_x_axis, gyro_y_axis, gyro_z_axis, accel_x_axis, accel_y_axis, accel_z_axis);
+
+
+    // float accel_x_axis = (float)ReadAxis(ACCELEROMETER_X_AXIS) * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - X_BIAS;
+    // float accel_y_axis = (float)ReadAxis(ACCELEROMETER_Y_AXIS) * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - Y_BIAS;
+    // float accel_z_axis = (float)ReadAxis(ACCELEROMETER_Z_AXIS) * ACCELEROMETER_SCALE / UNIT_SCALE;                          // - Z_BIAS;
+    // float gyro_x_axis = (float)ReadAxis(GYROSCOPE_X_AXIS) * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_x; // - Z_BIAS;
+    // float gyro_y_axis = (float)ReadAxis(GYROSCOPE_Y_AXIS) * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_y; // - Z_BIAS;
+    // float gyro_z_axis = (float)ReadAxis(GYROSCOPE_Z_AXIS) * GYROSCOPE_SCALE / UNIT_SCALE - accelerometer_calib_data.gyro_z; // - Z_BIAS;
+    // //short temp = ReadTemp();
+    short temp = 0;
+    //int64_t ExecCurrTime = esp_timer_get_time();
+    //printf("Exec time: %f \n", (float)(ExecCurrTime-ExecLastTime));
     Accelerometer_data values = {accel_x_axis, accel_y_axis, accel_z_axis, gyro_x_axis, gyro_y_axis, gyro_z_axis, temp};
     AssignValues(values);
     return values;
