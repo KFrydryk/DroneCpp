@@ -28,11 +28,14 @@ float Pressure::ReadhPa()
         vTaskDelay(portTICK_PERIOD_MS);
         //printf("waiting for pressure \n");
     }
-    regs[0] = ReadByte(addr, 0x28);
-    regs[1] = ReadByte(addr, 0x29);
-    regs[2] = ReadByte(addr, 0x2A);
-
+    ReadMulti(addr, 0x28|0x80, regs, 3);
+    // printf("%x\t%x\t%x\n", regs[0],regs[1],regs[2]);
+    //  regs[0] = ReadByte(addr, 0x28);
+    //  regs[1] = ReadByte(addr, 0x29);
+    //  regs[2] = ReadByte(addr, 0x2A);
+    // printf("%x\t%x\t%x\n", regs[0],regs[1],regs[2]);
     int32_t raw_val = (int32_t)(int8_t)regs[2] << 16 | (uint16_t)regs[1] << 8 | regs[0];
+    // printf("%f \n", (float)raw_val/4096);
     return (float)raw_val / 4096;
 }
 

@@ -85,7 +85,7 @@ void drone::CalcPosition()
 void drone::P_Roll(float roll)
 {
     RegCurrTime = esp_timer_get_time()/1000;
-    integral += roll * (RegCurrTime - RegLastTime)/1000;
+    integral += roll * (float)(RegCurrTime - RegLastTime)/1000;
 
     if (integral > 20)
     {
