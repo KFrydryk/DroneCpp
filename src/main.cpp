@@ -54,6 +54,7 @@ void app_main(void)
     startSocket();
     recSockStruct gotData;
     sendSockStruct sendData;
+    float controlSignal = 0;
     while (true)
     {
         //printf("%f, %f, %f \n", gotData.P, gotData.I, gotData.D);
@@ -63,17 +64,19 @@ void app_main(void)
         //vTaskDelay(1000 / portTICK_PERIOD_MS);
         // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
         // printf("duty %f \n", aaa);
-        sendData = {dron.Roll, dron.Pitch, dron.Yaw};
+
         gotData = sockSendReceive(sendData);
         dron.RollP = gotData.P;
         dron.RollI = gotData.I;
         dron.RollD = gotData.D;
 
-        dron.P_Roll(dron.Roll);
-        if (dron.RollP <= 0.05)
+        controlSignal = dron.P_Roll(dron.Roll);
+        if (dron.RollP <= 0.0005)
         {
             dron.SetSpeed(0, 0, 0, 0);
+            controlSignal = 0;
         }
+        sendData = {dron.Roll, dron.Pitch, dron.Yaw, controlSignal};
         Last_Delay_Time = Curr_Time;
         Curr_Delay_Time = esp_timer_get_time()/1000;
         printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));

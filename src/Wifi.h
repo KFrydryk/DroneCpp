@@ -46,6 +46,7 @@
         float R;
         float P;
         float Y;
+        float u;
     } sendSockStruct;
 
     esp_err_t event_handler(void *ctx, system_event_t *event);

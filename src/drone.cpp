@@ -63,7 +63,10 @@ void drone::CalcPosition()
     Magnet_yaw = atan2(Mag->y, Mag->x) * (180 / M_PI) - Mag->Zero;
 
     if (gyroSet)
-    {
+    {   
+        lastRoll = Roll;
+        lastPitch = Pitch;
+        lastYaw = Yaw;
         Roll = 0.95 * Roll + 0.05 * Acc_roll;
         Pitch = 0.95 * Pitch - 0.05 * Acc_pitch;
         Yaw = 0.995 * Yaw - 0.005 * Magnet_yaw;
@@ -82,10 +85,13 @@ void drone::CalcPosition()
  
 }
 
-void drone::P_Roll(float roll)
+float drone::P_Roll(float roll)
 {
     RegCurrTime = esp_timer_get_time()/1000;
-    integral += roll * (float)(RegCurrTime - RegLastTime)/1000;
+    LastRollError = RollError;
+    RollError = (0-roll);
+    integral += RollError * (float)(RegCurrTime - RegLastTime)/1000;
+    RegLastTime = RegCurrTime;
 
     if (integral > 20)
     {
@@ -95,21 +101,24 @@ void drone::P_Roll(float roll)
     {
         integral = -20;
     }
+    float u = RollP * RollError + RollI*integral+RollD*(RollError-LastRollError);
+    if (u<0)
+    {u = 0;}
+    SetSpeed(u, 0, 0, u);
+    return u;
+    // if (u > 30)
+    // {
+    //     u = 30;
+    // }
+    // else if (u < -30)
+    // {
+    //     u = -30;
+    // }
 
-    float u = RollP * roll + RollI*integral;
-    if (u > 30)
-    {
-        u = 30;
-    }
-    else if (u < -30)
-    {
-        u = -30;
-    }
+    // float MIDSPD = 70;
+    // float Rspd = MIDSPD + u;
+    // float Lspd = MIDSPD - u;
 
-    float MIDSPD = 70;
-    float Rspd = MIDSPD + u;
-    float Lspd = MIDSPD - u;
-    RegLastTime = RegCurrTime;
-    SetSpeed(Lspd, Rspd, Rspd, Lspd);
+    // SetSpeed(Lspd, Rspd, Rspd, Lspd);
     //bl br fr fl
 }

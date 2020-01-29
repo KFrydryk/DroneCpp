@@ -50,11 +50,17 @@ class drone
 
     int64_t ExecCurrTime = 0;
     int64_t ExecLastTime = 0;
+    float LastRollError = 0;
+    float RollError = 0;
 public:
     
     float Roll = 0;
     float Pitch = 0;
     float Yaw = 0;
+
+    float lastRoll = 0;
+    float lastPitch = 0;
+    float lastYaw = 0;
 
     float RollP = 0;
     float RollI = 0;
@@ -66,5 +72,5 @@ public:
 
     void SetSpeed(int vel1, int vel2, int vel3, int vel4);
 
-    void P_Roll(float roll);
+    float P_Roll(float roll);
 };
