@@ -19,6 +19,7 @@
 #include "magnet.h"
 #include "Pressure.h"
 #include "comm.h"
+#include "Kalman.h"
 
 
 
@@ -33,6 +34,9 @@ class drone
     motor *RR;
     motor *RL;
 
+    Kalman Kalman_Roll;
+    Kalman Kalman_Pitch;
+    Kalman Kalman_Yaw;
     Accelerometer* Acc;
     magnet* Mag;
     Pressure* Press;

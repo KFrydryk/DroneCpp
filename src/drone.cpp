@@ -12,6 +12,10 @@ drone::drone()
     Press = new Pressure(pressure_addr);
 
     Mag->TurnTempSensor(true);
+
+    Kalman_Roll.setAngle(0);
+    Kalman_Pitch.setAngle(0);
+    Kalman_Yaw.setAngle(0);
 }
 
 void drone::SetSpeed(int velFR, int velFL, int velRR, int velRL)
@@ -24,65 +28,29 @@ void drone::SetSpeed(int velFR, int velFL, int velRR, int velRL)
 
 void drone::CalcPosition()
 {
-
     float Acc_total_vec = 0;
     float Acc_roll;
     float Acc_pitch;
     float Acc_yaw;
-
-    float Magnet_total_vec = 0;
     float Magnet_yaw;
 
+    CurrentTime = esp_timer_get_time();
     Acc->ReadData();
-    //ExecLastTime = esp_timer_get_time();
     Mag->ReadData();
-    //ExecCurrTime = esp_timer_get_time();
-    if (PressureReadFrequency++ > 10){ 
-    Press->ReadData();
-    PressureReadFrequency = 0;
-    }
-  
-    CurrentTime = esp_timer_get_time()/1000;
 
-    Roll += (Acc->gX * (CurrentTime - LastTime) / 1000);
 
-    //calculate gyro readings
-    Pitch += (Acc->gY * (CurrentTime - LastTime) / 1000);
-    Yaw += (Acc->gZ * (CurrentTime - LastTime) / 1000);
-    Roll -= Pitch * sin(Acc->gZ * (CurrentTime - LastTime) / 1000 * M_PI / 180.0);
-    Pitch += Roll * sin(Acc->gZ * (CurrentTime - LastTime) / 1000 * M_PI / 180.0);
+    Acc_roll = atan2f(Acc->aY, Acc->aZ)*(180.0F/M_PI);
+    Acc_pitch = atanf(-Acc->aX / sqrt(Acc->aY * Acc->aY + Acc->aZ * Acc->aZ))*(180.0F/M_PI);
 
-    //calculate acc readings
-    Acc_total_vec = sqrt(pow(Acc->aX, 2) + pow(Acc->aY, 2) + pow(Acc->aZ, 2));
-    Acc_roll = asin(Acc->aY / Acc_total_vec) * (180.0 / M_PI);
-    Acc_pitch = asin(Acc->aX / Acc_total_vec) * (180.0 / M_PI);
-    //Acc_yaw = asin(Acc-aZ/Acc_total_vec)*(180.0/M_PI);
-
-    //calculate magnet readings
-    Magnet_total_vec = sqrt(pow(Mag->x, 2) + pow(Mag->y, 2));
     Magnet_yaw = atan2(Mag->y, Mag->x) * (180 / M_PI) - Mag->Zero;
 
-    if (gyroSet)
-    {   
-        lastRoll = Roll;
-        lastPitch = Pitch;
-        lastYaw = Yaw;
-        Roll = 0.95 * Roll + 0.05 * Acc_roll;
-        Pitch = 0.95 * Pitch - 0.05 * Acc_pitch;
-        Yaw = 0.995 * Yaw - 0.005 * Magnet_yaw;
-    }
-    else
-    {
-        Roll = Acc_roll;
-        Pitch = Acc_pitch;
-        gyroSet = true;
-        Mag->Zero = Magnet_yaw;
-    }
+    Roll = Kalman_Roll.getAngle(Acc_roll, Acc->gX, (float)(CurrentTime-LastTime)/1000000.0F);
+    Pitch = Kalman_Pitch.getAngle(Acc_pitch, Acc->gY, (float)(CurrentTime-LastTime)/1000000.0F);
+    Yaw = Kalman_Yaw.getAngle(Magnet_yaw, Acc->gZ, (float)(CurrentTime-LastTime)/1000000.0F);
 
     LastTime = CurrentTime;
- 
-   //printf("Exec time: %f \n", (float)(ExecCurrTime-ExecLastTime)/1000);
- 
+
+
 }
 
 float drone::P_Roll(float roll)
