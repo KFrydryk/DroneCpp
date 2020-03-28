@@ -41,7 +41,7 @@ void app_main(void)
     printf("zaczynam");
 
     //xTaskCreate(printtask, "printtask", 1000, NULL, 1, NULL);
-
+    
     int64_t Curr_Time = 0;
     int64_t Last_Time = 0;
     int64_t Curr_Delay_Time = 0;
@@ -79,10 +79,10 @@ void app_main(void)
         sendData = {dron.Roll, dron.Pitch, dron.Yaw, controlSignal};
         Last_Delay_Time = Curr_Time;
         Curr_Delay_Time = esp_timer_get_time()/1000;
-        printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
+        //printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
         if (Curr_Time - Last_Time > 500)
         {
-            printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
+            //printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
                 //int64_t time_since_boot = esp_timer_get_time();
                 //printf("time: %f \n", (float)(time_since_boot/1000));
             //printf("P: %f, I: %f, D: %f \n", gotData.P, dron.RollI, dron.RollD);

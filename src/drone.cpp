@@ -90,20 +90,25 @@ float drone::P_Roll(float roll)
     RegCurrTime = esp_timer_get_time()/1000;
     LastRollError = RollError;
     RollError = (0-roll);
-    integral += RollError * (float)(RegCurrTime - RegLastTime)/1000;
+    integral +=  RollI*RollError * (float)(RegCurrTime - RegLastTime)/1000;
     RegLastTime = RegCurrTime;
 
-    if (integral > 20)
+    if (integral > 700)
     {
-        integral = 20;
+        integral = 700;
     }
-    else if (integral < -20)
+    else if (integral < -700)
     {
-        integral = -20;
+        integral = -700;
     }
-    float u = RollP * RollError + RollI*integral+RollD*(RollError-LastRollError);
-    if (u<0)
-    {u = 0;}
+    //float u = sqrt(RollP * RollError +integral+RollD*(RollError-LastRollError)*(RegCurrTime-RegLastTime)/1000);
+    float u = RollP * RollError +integral;//+RollD*(RollError-LastRollError)*(RegCurrTime-RegLastTime)/1000;
+    //printf("%f \n", u);
+    if (u<1)
+    {u = 1;}
+    u=sqrt(u);
+    if (u>100)
+    {u=100;}
     SetSpeed(u, 0, 0, u);
     return u;
     // if (u > 30)

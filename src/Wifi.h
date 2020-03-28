@@ -29,7 +29,7 @@
 #define SSID "Jezus cie widzi 2.4"
 #define PASS  "lubieplacki"
 
-#define HOST_IP_ADDR "192.168.0.107"
+#define HOST_IP_ADDR "192.168.0.108"
 #define PORT 8080
 
 

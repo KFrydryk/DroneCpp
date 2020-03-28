@@ -37,19 +37,19 @@ class drone
     magnet* Mag;
     Pressure* Press;
 
-    int64_t CurrentTime = 0;
-    int64_t LastTime = 0;
+    double CurrentTime = 0;
+    double LastTime = 0;
 
     bool gyroSet = false;
     
     float integral = 0;
-    int64_t RegCurrTime = 0;
-    int64_t RegLastTime = 0;
+    double RegCurrTime = 0;
+    double RegLastTime = 0;
 
     int PressureReadFrequency = 0;
 
-    int64_t ExecCurrTime = 0;
-    int64_t ExecLastTime = 0;
+    double ExecCurrTime = 0;
+    double ExecLastTime = 0;
     float LastRollError = 0;
     float RollError = 0;
 public:
