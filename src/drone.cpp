@@ -26,7 +26,7 @@ void drone::SetSpeed(int velFR, int velFL, int velRR, int velRL)
     RL->setSpeed(velRL);
 }
 
-void drone::CalcPosition()
+void drone::CalcState()
 {
     float Acc_total_vec = 0;
     float Acc_roll;
@@ -38,46 +38,61 @@ void drone::CalcPosition()
     Acc->ReadData();
     Mag->ReadData();
 
-
-    Acc_roll = atan2f(Acc->aY, Acc->aZ)*(180.0F/M_PI);
-    Acc_pitch = atanf(-Acc->aX / sqrt(Acc->aY * Acc->aY + Acc->aZ * Acc->aZ))*(180.0F/M_PI);
+    Acc_roll = atan2f(Acc->aY, Acc->aZ) * (180.0F / M_PI);
+    Acc_pitch = atanf(-Acc->aX / sqrt(Acc->aY * Acc->aY + Acc->aZ * Acc->aZ)) * (180.0F / M_PI);
 
     Magnet_yaw = atan2(Mag->y, Mag->x) * (180 / M_PI) - Mag->Zero;
 
-    Roll = Kalman_Roll.getAngle(Acc_roll, Acc->gX, (float)(CurrentTime-LastTime)/1000000.0F);
-    Pitch = Kalman_Pitch.getAngle(Acc_pitch, Acc->gY, (float)(CurrentTime-LastTime)/1000000.0F);
-    Yaw = Kalman_Yaw.getAngle(Magnet_yaw, Acc->gZ, (float)(CurrentTime-LastTime)/1000000.0F);
+    float timeDiff = (float)(CurrentTime - LastTime) / 1000000.0F;
 
+    Roll = Kalman_Roll.getAngle(Acc_roll, Acc->gX, timeDiff);
+    Pitch = Kalman_Pitch.getAngle(Acc_pitch, Acc->gY, timeDiff);
+    Yaw = Kalman_Yaw.getAngle(Magnet_yaw, Acc->gZ, timeDiff);
+
+    RollRate = (Roll - lastRoll) / timeDiff;
+    PitchRate = (Pitch - lastPitch) / timeDiff;
+    YawRate = (Yaw - lastYaw) / timeDiff;
+
+    velocities[0] = Acc->aX*timeDiff;
+    velocities[1] = Acc->aY*timeDiff;
+    velocities[2] = Acc->aZ*timeDiff;
+
+    position[0] = velocities[0]*timeDiff;
+    position[1] = velocities[1]*timeDiff;
+    position[2] = velocities[2]*timeDiff;
+
+
+    lastRoll = Roll;
+    lastYaw = Yaw;
+    lastPitch = Pitch;
     LastTime = CurrentTime;
-
-
 }
 
-float drone::P_Roll(float roll)
+float drone::RollPID(float roll)
 {
-    RegCurrTime = esp_timer_get_time()/1000;
+    RollRegCurrTime = esp_timer_get_time() / 1000;
     LastRollError = RollError;
-    RollError = (0-roll);
-    integral +=  RollI*RollError * (float)(RegCurrTime - RegLastTime)/1000;
-    RegLastTime = RegCurrTime;
+    RollError = (0 - roll);
+    Rollintegral += RollI * RollError * (float)(RollRegCurrTime - RollRegLastTime) / 1000;
+    RollRegLastTime = RollRegCurrTime;
 
-    if (integral > 700)
+    if (Rollintegral > 700)
     {
-        integral = 700;
+        Rollintegral = 700;
     }
-    else if (integral < -700)
+    else if (Rollintegral < -700)
     {
-        integral = -700;
+        Rollintegral = -700;
     }
     //float u = sqrt(RollP * RollError +integral+RollD*(RollError-LastRollError)*(RegCurrTime-RegLastTime)/1000);
-    float u = RollP * RollError +integral;//+RollD*(RollError-LastRollError)*(RegCurrTime-RegLastTime)/1000;
+    float u = RollP * RollError + Rollintegral; //+RollD*(RollError-LastRollError)*(RegCurrTime-RegLastTime)/1000;
     //printf("%f \n", u);
-    if (u<1)
-    {u = 1;}
-    u=sqrt(u);
-    if (u>100)
-    {u=100;}
-    SetSpeed(u, 0, 0, u);
+    // if (u<1)
+    // {u = 1;}
+    // u=sqrt(u);
+    // if (u>100)
+    // {u=100;}
+    //SetSpeed(u, 0, 0, u);
     return u;
     // if (u > 30)
     // {
@@ -94,4 +109,25 @@ float drone::P_Roll(float roll)
 
     // SetSpeed(Lspd, Rspd, Rspd, Lspd);
     //bl br fr fl
+}
+
+float drone::PitchPID(float pitch)
+{
+    PitchRegCurrTime = esp_timer_get_time() / 1000;
+    LastPitchError = PitchError;
+    PitchError = (0 - pitch);
+    Pitchintegral += RollI * PitchError * (float)(PitchRegCurrTime - PitchRegLastTime) / 1000;
+    PitchRegLastTime = PitchRegCurrTime;
+
+    if (Pitchintegral > 700)
+    {
+        Pitchintegral = 700;
+    }
+    else if (Pitchintegral < -700)
+    {
+        Pitchintegral = -700;
+    }
+    float u = RollP * PitchError + Pitchintegral;
+
+    return u;
 }

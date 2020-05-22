@@ -8,7 +8,15 @@ motor::motor(mcpwm_unit_t mcpwm_num, mcpwm_io_signals_t io_signal, mcpwm_timer_t
     mcpwm_init(mcpwm_num, timer_num, &pwm_config);   //Configure PWM0A & PWM0B with above settings
 }
 void motor::setSpeed(int speed)
-{
-        mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_A, speed);
+{   
+    if(speed < 0)
+    {
+        speed = 0;
+    }
+    else if (speed > 100)
+    {
+        speed = 100;
+    }
+    mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_A, speed);
 
 }//aa

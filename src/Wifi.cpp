@@ -182,7 +182,7 @@ void tcp_client_task(void *pvParameters)
                 {
                     //rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
                     //ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                    //ESP_LOGI(TAG, "%f, %f, %f", receivedData.P, receivedData.I, receivedData.D);
+                    ESP_LOGI(TAG, "%f, %f, %f, %f", receivedData.P, receivedData.I, receivedData.D, receivedData.Fz);
                     if (xQueueSendToBack(wifiRxQueue, (void *)&receivedData, (TickType_t)10) != pdPASS)
                     {
                         ESP_LOGE(TAG, "couldn't send received data to main task");
@@ -222,7 +222,7 @@ void startSocket()
     xTaskCreate(tcp_client_task, "tcp_client", 4096, NULL, 1, NULL);
 }
 
-recSockStruct sockSendReceive(sendSockStruct sendData)
+recSockStruct sockSendReceive(sendSockStruct sendData, recSockStruct lastData)
 {
     recSockStruct receivedData;
     if (uxQueueMessagesWaiting(wifiTxQueue) < 10)
@@ -239,5 +239,10 @@ recSockStruct sockSendReceive(sendSockStruct sendData)
         xQueueReceive(wifiRxQueue, &(receivedData), (TickType_t)0);
         //printf("Main task got: %f, %f, %f \n", receivedData.P, receivedData.I, receivedData.D);
     }
+    else
+    {
+        receivedData = lastData;
+    }
+    
     return receivedData;
 }

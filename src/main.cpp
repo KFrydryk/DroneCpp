@@ -57,39 +57,41 @@ void app_main(void)
     printf("aa");
     recSockStruct gotData;
     sendSockStruct sendData;
-    float controlSignal = 0;
+    float RollcontrolSignal = 0;
+    float PitchcontrolSignal = 0;
     printf("aa");
     while (true)
     {
-        //printf("aa");
-        //printf("%f, %f, %f \n", gotData.P, gotData.I, gotData.D);
-        Curr_Time = esp_timer_get_time()/1000;
-        dron.CalcPosition();
 
-        //vTaskDelay(1000 / portTICK_PERIOD_MS);
-        // aaa = mcpwm_get_duty(MCPWM_UNIT_1, MCPWM_TIMER_0, MCPWM_OPR_A);
-        // printf("duty %f \n", aaa);
-        
-        gotData = sockSendReceive(sendData);
+        Curr_Time = esp_timer_get_time()/1000;
+        dron.CalcState();
+
+        gotData = sockSendReceive(sendData, gotData);
         dron.RollP = gotData.P;
         dron.RollI = gotData.I;
         dron.RollD = gotData.D;
 
-        controlSignal = dron.P_Roll(dron.Roll);
-        if (dron.RollP <= 0.0005)
+        RollcontrolSignal = 0;
+        RollcontrolSignal = dron.RollPID(dron.Roll);
+        PitchcontrolSignal = dron.RollPID(dron.Pitch);
+        float Fz = gotData.Fz;
+        
+        //dron.SetSpeed(Fz + RollcontrolSignal, Fz - RollcontrolSignal, Fz - RollcontrolSignal, Fz + RollcontrolSignal);
+        dron.SetSpeed(Fz + PitchcontrolSignal+ RollcontrolSignal, Fz + PitchcontrolSignal- RollcontrolSignal, Fz - PitchcontrolSignal - RollcontrolSignal, Fz - PitchcontrolSignal + RollcontrolSignal);
+        if (Fz <= 0.0005)
         {
             dron.SetSpeed(0, 0, 0, 0);
-            controlSignal = 0;
+            RollcontrolSignal = 0;
         }
-        sendData = {dron.Roll, dron.Pitch, dron.Yaw, controlSignal};
+        sendData = {dron.Roll, dron.Pitch, dron.Yaw, RollcontrolSignal};
         Last_Delay_Time = Curr_Delay_Time;
         Curr_Delay_Time = esp_timer_get_time();
         //printf("time delay = %ld \n", (long)(Curr_Delay_Time-Last_Delay_Time));
         if (Curr_Time - Last_Time > 200)
         {
             vTaskDelay(1);
-            printf("time delay = %f \n", (float)(Curr_Delay_Time-Last_Delay_Time)/1000);
-
+            //printf("time delay = %f \n", (float)(Curr_Delay_Time-Last_Delay_Time)/1000);
+            //printf("cs = %f, P = %f, I = %f, D = %f \n", controlSignal, dron.RollP, dron.RollI, dron.RollD);
                 //int64_t time_since_boot = esp_timer_get_time();
                 //printf("time: %f \n", (float)(time_since_boot/1000));
             //printf("P: %f, I: %f, D: %f \n", gotData.P, dron.RollI, dron.RollD);

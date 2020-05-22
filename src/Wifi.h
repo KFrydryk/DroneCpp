@@ -36,7 +36,7 @@
 #define EXAMPLE_ESP_MAXIMUM_RETRY  5
 
 //#define HOST_IP_ADDR "192.168.1.66"
-#define HOST_IP_ADDR "192.168.0.109"
+#define HOST_IP_ADDR "192.168.0.106"
 #define PORT 8080
 
 
@@ -46,6 +46,7 @@
         float P;
         float I;
         float D;
+        float Fz;
     } recSockStruct;
 
         typedef struct
@@ -66,4 +67,4 @@
 
     void startSocket();
 
-    recSockStruct sockSendReceive(sendSockStruct sendData);
+    recSockStruct sockSendReceive(sendSockStruct sendData, recSockStruct lastData);

@@ -46,9 +46,13 @@ class drone
 
     bool gyroSet = false;
     
-    float integral = 0;
-    double RegCurrTime = 0;
-    double RegLastTime = 0;
+    float Rollintegral = 0;
+    double RollRegCurrTime = 0;
+    double RollRegLastTime = 0;
+    
+    float Pitchintegral = 0;
+    double PitchRegCurrTime = 0;
+    double PitchRegLastTime = 0;
 
     int PressureReadFrequency = 0;
 
@@ -56,12 +60,20 @@ class drone
     double ExecLastTime = 0;
     float LastRollError = 0;
     float RollError = 0;
+    float PitchError = 0;
+    float LastPitchError = 0;
 public:
-    
+    float position[3] = {0, 0, 0};
+    float velocities[3] = {0, 0, 0};
+
     float Roll = 0;
     float Pitch = 0;
     float Yaw = 0;
 
+    float RollRate = 0;
+    float PitchRate = 0;
+    float YawRate = 0;
+    
     float lastRoll = 0;
     float lastPitch = 0;
     float lastYaw = 0;
@@ -70,11 +82,17 @@ public:
     float RollI = 0;
     float RollD = 0;
 
+
     drone();
 
-    void CalcPosition();
+    void CalcState();
 
     void SetSpeed(int vel1, int vel2, int vel3, int vel4);
 
-    float P_Roll(float roll);
+    float RollPID(float roll);
+    float PitchPID(float pitch);
+
+    
+
+
 };
