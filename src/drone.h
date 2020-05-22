@@ -21,7 +21,11 @@
 #include "comm.h"
 #include "Kalman.h"
 
-
+typedef struct {
+    float X;
+    float Y;
+    float Z;
+} vec3_f;
 
 class drone
 {
@@ -63,8 +67,10 @@ class drone
     float PitchError = 0;
     float LastPitchError = 0;
 public:
-    float position[3] = {0, 0, 0};
-    float velocities[3] = {0, 0, 0};
+    vec3_f position = {0, 0, 0};
+    vec3_f velocities = {0, 0, 0};
+    // float position[3] = {0, 0, 0};
+    // float velocities[3] = {0, 0, 0};
 
     float Roll = 0;
     float Pitch = 0;
@@ -92,7 +98,7 @@ public:
     float RollPID(float roll);
     float PitchPID(float pitch);
 
-    
+    vec3_f integrate3_f(vec3_f val, float deltaTime);
 
 
 };

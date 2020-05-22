@@ -53,14 +53,8 @@ void drone::CalcState()
     PitchRate = (Pitch - lastPitch) / timeDiff;
     YawRate = (Yaw - lastYaw) / timeDiff;
 
-    velocities[0] = Acc->aX*timeDiff;
-    velocities[1] = Acc->aY*timeDiff;
-    velocities[2] = Acc->aZ*timeDiff;
-
-    position[0] = velocities[0]*timeDiff;
-    position[1] = velocities[1]*timeDiff;
-    position[2] = velocities[2]*timeDiff;
-
+    velocities = integrate3_f((vec3_f){Acc->aX, Acc->aY, Acc->aZ}, timeDiff);
+    position = integrate3_f(velocities, timeDiff);
 
     lastRoll = Roll;
     lastYaw = Yaw;
@@ -130,4 +124,13 @@ float drone::PitchPID(float pitch)
     float u = RollP * PitchError + Pitchintegral;
 
     return u;
+}
+
+vec3_f integrate3_f(vec3_f val, float deltaTime)
+{
+    vec3_f iVals;
+    iVals.X = val.X * deltaTime;
+    iVals.Y = val.Y * deltaTime;
+    iVals.Z = val.Z * deltaTime;
+    return iVals;
 }
