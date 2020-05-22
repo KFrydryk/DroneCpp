@@ -30,13 +30,16 @@
 
 
 //#define SSID "INEA-7A57_2.4G"
-#define SSID "Jezus cie widzi 2.4"
-#define PASS "lubieplacki"
+//#define SSID "Jezus cie widzi 2.4"
+//#define PASS "lubieplacki"
+#define SSID "test"
+#define PASS "12345678"
 //#define PASS  "2982155898"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  5
 
 //#define HOST_IP_ADDR "192.168.1.66"
-#define HOST_IP_ADDR "192.168.0.106"
+//#define HOST_IP_ADDR "192.168.0.106"
+#define HOST_IP_ADDR "192.168.43.52"
 #define PORT 8080
 
 

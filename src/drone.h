@@ -98,7 +98,7 @@ public:
     float RollPID(float roll);
     float PitchPID(float pitch);
 
-    vec3_f integrate3_f(vec3_f val, float deltaTime);
+    vec3_f integrate3_f(vec3_f curVal, vec3_f val, float deltaTime);
 
 
 };

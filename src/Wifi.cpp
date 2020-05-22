@@ -182,7 +182,7 @@ void tcp_client_task(void *pvParameters)
                 {
                     //rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
                     //ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                    ESP_LOGI(TAG, "%f, %f, %f, %f", receivedData.P, receivedData.I, receivedData.D, receivedData.Fz);
+                    //ESP_LOGI(TAG, "%f, %f, %f, %f", receivedData.P, receivedData.I, receivedData.D, receivedData.Fz);
                     if (xQueueSendToBack(wifiRxQueue, (void *)&receivedData, (TickType_t)10) != pdPASS)
                     {
                         ESP_LOGE(TAG, "couldn't send received data to main task");

@@ -53,9 +53,12 @@ void drone::CalcState()
     PitchRate = (Pitch - lastPitch) / timeDiff;
     YawRate = (Yaw - lastYaw) / timeDiff;
 
-    velocities = integrate3_f((vec3_f){Acc->aX, Acc->aY, Acc->aZ}, timeDiff);
-    position = integrate3_f(velocities, timeDiff);
+    vec3_f accelerations = {Acc->aX, Acc->aY, Acc->aZ};
+    velocities = integrate3_f(velocities, accelerations, timeDiff); //({Acc->aX, Acc->aY, Acc->aZ}, timeDiff);
+    position = integrate3_f(position, velocities, timeDiff);
 
+    ESP_LOGI("drone", "%f, %f, %f", position.X, position.Y, position.Z);
+    //ESP_LOGI("drone", "%f, %f, %f", accelerations.X, accelerations.Y, accelerations.Z);
     lastRoll = Roll;
     lastYaw = Yaw;
     lastPitch = Pitch;
@@ -126,11 +129,11 @@ float drone::PitchPID(float pitch)
     return u;
 }
 
-vec3_f integrate3_f(vec3_f val, float deltaTime)
+vec3_f drone::integrate3_f(vec3_f curVal, vec3_f val, float deltaTime)
 {
     vec3_f iVals;
-    iVals.X = val.X * deltaTime;
-    iVals.Y = val.Y * deltaTime;
-    iVals.Z = val.Z * deltaTime;
+    iVals.X = curVal.X + val.X * deltaTime;
+    iVals.Y = curVal.Y + val.Y * deltaTime;
+    iVals.Z = curVal.Z + val.Z * deltaTime;
     return iVals;
 }
